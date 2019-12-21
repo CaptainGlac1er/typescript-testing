@@ -1,5 +1,8 @@
-#Before
-Leaks memory
+# How to fix tests leaking memory and maintain type checking
+
+## Before
+
+* Leaks memory
 ```typescript
 describe('AppComponent', () => {
   const fixture: ComponentFixture<AppComponent>;
@@ -24,25 +27,28 @@ describe('AppComponent', () => {
   
   describe('testFunction', () => {
      const testString: string;
+
      beforeEach(() => {
         testString = 'open the pod bay doors, hal';
      });
+
      it('should return something from hal', () => {
         const response: string = 'i\'m sorry dave';
-        expect(await component.testFunction(testString)).toEqual(response);
+        expect(component.testFunction(testString)).toEqual(response);
      });
   });
 });
 ```
-#After
-Does not leak memory
+## After
 
-It is okay to have variable inside of `it` statement as only shared variables can leak
+* Does not leak memory
+
+> It is okay to have variables inside of `it` statement as only shared variables can leak
 ```typescript
 describe('AppComponent', () => {
   interface AppComponentTests {
+    fixture: ComponentFixture<AppComponent>;
     component: AppComponent;
-    fixture: ComponentFixture<AppCompent>;
   }
 
   beforeEach(async function (this: AppComponentTests) {
@@ -66,12 +72,14 @@ describe('AppComponent', () => {
      interface TestFunctionTests extends AppComponentTests {
          testString: string;
      }
+
      beforeEach(function (this: TestFunctionTests) {
         this.testString = 'open the pod bay doors, hal';
-     })
+     });
+
      it('should return something from hal', function (this: TestFunctionTests) {
         const response: string = 'i\'m sorry dave';
-        expect(await this.component.testFunction(this.testString)).toEqual(response);
+        expect(this.component.testFunction(this.testString)).toEqual(response);
      });
   });
 });
